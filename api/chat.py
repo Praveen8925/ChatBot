@@ -12,7 +12,9 @@ chatbot, model = build_chat_chain()
 async def health():
     try:
         # Simple ping to model
-        await chatbot.ainvoke({"message": "hi"})
+        await chatbot.ainvoke({"message": "hi"},config={
+        "configurable": {
+            "session_id": "health-check"}})
 
         return {
             "status": "ok",
@@ -44,31 +46,4 @@ async def chat(req: ChatRequest) -> ChatResponse:
         raise HTTPException(
             status_code=503,
             detail=f"LLM unavailable: {e}"
-        )
-@router.post("/chat", response_model=ChatResponse)
-async def chat(req: ChatRequest):
-
-    try:
-
-        reply = await chatbot.ainvoke(
-
-            {"message": req.message},
-
-            config={
-                "configurable": {
-                    "session_id": req.session_id
-                }
-            }
-        )
-
-        return ChatResponse(
-            reply=reply,
-            model=model
-        )
-
-    except Exception as e:
-
-        raise HTTPException(
-            status_code=503,
-            detail=str(e)
         )
